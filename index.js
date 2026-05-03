@@ -14,21 +14,25 @@ const app = express();
 connectDB();
 
 const PORT = process.env.PORT || 5000;
-const allowedOrigins = (process.env.CLIENT_URLS || "http://localhost:5173,http://127.0.0.1:5173")
-    .split(",")
-    .map((origin) => origin.trim())
-    .filter(Boolean);
-
 app.use(cors({
-    origin: (origin, callback) => {
-        if (!origin || allowedOrigins.includes(origin)) {
-            return callback(null, true);
-        }
-
-        return callback(new Error(`CORS blocked for origin: ${origin}`));
-    },
+    origin: "https://your-frontend-link.vercel.app", 
     credentials: true
 }));
+// const allowedOrigins = (process.env.CLIENT_URLS || "http://localhost:5173,http://127.0.0.1:5173")
+//     .split(",")
+//     .map((origin) => origin.trim())
+//     .filter(Boolean);
+
+// app.use(cors({
+//     origin: (origin, callback) => {
+//         if (!origin || allowedOrigins.includes(origin)) {
+//             return callback(null, true);
+//         }
+
+//         return callback(new Error(`CORS blocked for origin: ${origin}`));
+//     },
+//     credentials: true
+// }));
 
 app.use(express.json());
 app.use(cookieParser());

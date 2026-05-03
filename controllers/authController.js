@@ -6,13 +6,10 @@ import sendEmail from "../utils/sendEmail.js";
 
 
 const getCookieOptions = (req, expires) => {
-    const isSecureRequest =
-        req.secure || req.headers["x-forwarded-proto"] === "https";
-
     return {
         httpOnly: true,
-        secure: isSecureRequest,
-        sameSite: isSecureRequest ? "none" : "lax",
+        secure: true, // Vercel is always HTTPS
+        sameSite: "none", // Must be none for cross-site
         expires,
         path: "/"
     };
