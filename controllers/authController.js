@@ -5,12 +5,12 @@ import asyncHandler from "../utils/asyncHandler.js";
 import sendEmail from "../utils/sendEmail.js";
 
 
-const getCookieOptions = (req, expires) => {
+const getCookieOptions = () => {
     return {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
-        sameSite: "strict",
-        expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+        expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
     };
 };
 
@@ -90,7 +90,7 @@ export const forgotPassword = asyncHandler(async (req, res) => {
     const resetToken = user.getResetPasswordToken();
     await user.save({ validateBeforeSave: false });
 
-    const resetUrl = `http://localhost:5173/reset-password/${resetToken}`;
+    const resetUrl = `${process.env.CLIENT_URL}/reset-password/${resetToken}`;
 
     // Professional HTML Template
     const htmlMessage = `
