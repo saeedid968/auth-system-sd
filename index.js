@@ -6,7 +6,6 @@ import cookieParser from "cookie-parser";
 import authRoutes from "./routes/authRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
-
 import errorHandler from "./middleware/errorMiddleware.js";
 
 dotenv.config();
@@ -14,25 +13,24 @@ const app = express();
 connectDB();
 
 const PORT = process.env.PORT || 5000;
+
+const allowedOrigins = [
+    "http://localhost:5173",
+    process.env.CLIENT_URL];
+
 app.use(cors({
-    origin: "https://your-frontend-link.vercel.app", 
-    credentials: true
+    origin: function (origin, callback) {
+        // !origin allow karta hai server-to-server ya Postman requests ko
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);
+        } else {
+            callback(new Error("Not allowed by CORS"));
+        }
+    },
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    allowedHeaders: ["Content-Type", "Authorization"]
 }));
-// const allowedOrigins = (process.env.CLIENT_URLS || "http://localhost:5173,http://127.0.0.1:5173")
-//     .split(",")
-//     .map((origin) => origin.trim())
-//     .filter(Boolean);
-
-// app.use(cors({
-//     origin: (origin, callback) => {
-//         if (!origin || allowedOrigins.includes(origin)) {
-//             return callback(null, true);
-//         }
-
-//         return callback(new Error(`CORS blocked for origin: ${origin}`));
-//     },
-//     credentials: true
-// }));
 
 app.use(express.json());
 app.use(cookieParser());

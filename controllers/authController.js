@@ -8,10 +8,9 @@ import sendEmail from "../utils/sendEmail.js";
 const getCookieOptions = (req, expires) => {
     return {
         httpOnly: true,
-        secure: true, // Vercel is always HTTPS
-        sameSite: "none", // Must be none for cross-site
-        expires,
-        path: "/"
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict",
+        expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
     };
 };
 
