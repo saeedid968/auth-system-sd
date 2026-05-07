@@ -81,7 +81,13 @@ export const logoutUser = (req, res) => {
 };
 
 export const forgotPassword = asyncHandler(async (req, res) => {
-    const user = await User.findOne({ email: req.body.email });
+    const email = req.body.email?.trim().toLowerCase();
+
+    if (!email) {
+        return res.status(400).json({ message: "Email is required" });
+    }
+
+    const user = await User.findOne({ email });
 
     if (!user) {
         return res.status(404).json({ message: "User not found" });
@@ -90,7 +96,13 @@ export const forgotPassword = asyncHandler(async (req, res) => {
     const resetToken = user.getResetPasswordToken();
     await user.save({ validateBeforeSave: false });
 
-    const resetUrl = `${process.env.CLIENT_URL}/reset-password/${resetToken}`;
+    const clientUrl =
+        process.env.CLIENT_URL ||
+        req.get("origin") ||
+        (process.env.NODE_ENV === "production"
+            ? "https://auth-system-sd-frontend.vercel.app"
+            : "http://localhost:5173");
+    const resetUrl = `${clientUrl.replace(/\/$/, "")}/reset-password/${resetToken}`;
 
     // Professional HTML Template
     const htmlMessage = `
@@ -125,13 +137,16 @@ export const forgotPassword = asyncHandler(async (req, res) => {
             html: htmlMessage, // HTML version
         });
 
-        res.status(200).json({ success: true, message: "Professional email sent!" });
+        res.status(200).json({ success: true, message: "Reset link sent to your email." });
     } catch (err) {
         console.log("NODEMAILER ERROR:", err);
         user.resetPasswordToken = undefined;
         user.resetPasswordExpire = undefined;
         await user.save({ validateBeforeSave: false });
-        return res.status(500).json({ message: "Email could not be sent" });
+        return res.status(500).json({
+            message: "Email could not be sent. Check SMTP settings.",
+            error: process.env.NODE_ENV === "production" ? undefined : err.message
+        });
     }
 });
 
